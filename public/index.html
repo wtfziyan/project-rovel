@@ -1,0 +1,2543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rovel - Manga & Novels Reader</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <style>
+    :root {
+      --bg: #05081a;
+      --card: #0b0f1a;
+      --accent: #7c3aed;
+      --accent2: #2b6df6;
+      --text: #ffffff;
+      --muted: #aab2ff;
+      --glass: rgba(255, 255, 255, 0.06);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #eef2ff;
+      --card: #ffffff;
+      --text: #0b0f1a;
+      --muted: #475569;
+      --accent: #6d28d9;
+      --accent2: #2563eb;
+      --glass: rgba(0, 0, 0, 0.06);
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin:0; 
+      padding:0; 
+      -webkit-tap-highlight-color:transparent; 
+      -webkit-user-select:none; 
+      -moz-user-select:none; 
+      -ms-user-select:none; 
+      user-select:none; 
+    }
+    
+    img { 
+      -webkit-user-drag:none; 
+      -khtml-user-drag:none; 
+      -moz-user-drag:none; 
+      -o-user-drag:none; 
+      user-drag:none; 
+    }
+
+    body {
+      font-family: system-ui, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      touch-action: manipulation;
+    }
+
+    /* Splash Screen */
+    .splash { 
+      position: fixed; 
+      inset: 0; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      background: radial-gradient(circle at 50% 30%, #0a0f2a, #000); 
+      z-index:9999; 
+    }
+    
+    .splash-stack { 
+      display:flex; 
+      flex-direction:column; 
+      align-items:center; 
+      gap:12px; 
+    }
+    
+    .rotor { 
+      position:relative; 
+      width:80px; 
+      height:80px; 
+    }
+    
+    .panel { 
+      position:absolute; 
+      width:30px; 
+      height:45px; 
+      border-radius:6px; 
+      background: linear-gradient(180deg, var(--accent2), var(--accent)); 
+      opacity:.9; 
+      box-shadow:0 5px 15px rgba(0,0,0,.6); 
+    }
+    
+    .p1{ left:5px; top:10px; animation:spin 1.8s linear infinite; }
+    .p2{ left:25px; top:20px; animation:spin 2.2s linear infinite reverse; }
+    .p3{ left:45px; top:5px; animation:spin 1.4s linear infinite; }
+    
+    @keyframes spin { to{ transform:rotate(360deg); } }
+    
+    .typing{ min-height:20px; font-weight:700; letter-spacing:.5px; color:white; font-size:1.2rem; }
+    
+    .shatter{ width:90px; height:4px; background: linear-gradient(90deg, transparent, var(--accent2), var(--accent), transparent); filter: blur(4px); animation:merge 2s ease-in-out infinite; }
+    
+    @keyframes merge { 
+      0%{ transform:scaleX(.4); opacity:.4 } 
+      50%{ transform:scaleX(1); opacity:1 } 
+      to{ transform:scaleX(.4); opacity:.4 } 
+    }
+
+    /* Guest modal */
+    .guest-modal { 
+      position:fixed; 
+      inset:0; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      background:rgba(0,0,0,0.9); 
+      backdrop-filter: blur(10px); 
+      z-index:1000; 
+      animation:fadeIn .5s ease; 
+    }
+    
+    .guest-card { 
+      width:90%; 
+      max-width:400px; 
+      background: linear-gradient(145deg,#0c1020,#0a0d1a); 
+      padding:2.5rem; 
+      border-radius:20px; 
+      text-align:center; 
+      border:1px solid rgba(124,58,237,.2); 
+      box-shadow:0 25px 50px rgba(0,0,0,.8); 
+      animation:slideUp .5s cubic-bezier(.18,1.25,.4,1); 
+      position:relative; 
+      overflow:hidden; 
+    }
+    
+    @keyframes slideUp { 
+      0%{ transform:translateY(50px); opacity:0 } 
+      to{ transform:none; opacity:1 } 
+    }
+    
+    .guest-card h3 { 
+      margin-bottom:1rem; 
+      color:var(--accent); 
+      font-size:1.8rem; 
+      background: linear-gradient(90deg,var(--accent2),var(--accent)); 
+      -webkit-background-clip:text; 
+      -webkit-text-fill-color:transparent; 
+    }
+    
+    .guest-card p { 
+      color:var(--muted); 
+      margin-bottom:1.5rem; 
+      font-size:1rem; 
+    }
+    
+    .guest-card input { 
+      width:100%; 
+      padding:1rem; 
+      border-radius:12px; 
+      border:1px solid rgba(255,255,255,.1); 
+      background:var(--glass); 
+      color:var(--text); 
+      margin-bottom:1.5rem; 
+      font-size:1rem; 
+      transition:all .3s ease; 
+    }
+    
+    .guest-card input:focus { 
+      outline:none; 
+      border-color:var(--accent); 
+      box-shadow:0 0 0 2px rgba(124,58,237,0.3); 
+    }
+    
+    .g-actions { 
+      display:flex; 
+      justify-content:center; 
+    }
+
+    /* Close button for modals */
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: all 0.2s ease;
+    }
+    
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    /* Buttons */
+    .btn { 
+      padding:12px 18px; 
+      border-radius:12px; 
+      border:none; 
+      cursor:pointer; 
+      font-weight:600; 
+      transition:all .2s ease; 
+      font-size:16px; 
+    }
+    
+    .btn.primary { 
+      background: linear-gradient(90deg,var(--accent2),var(--accent)); 
+      color:#fff; 
+    }
+    
+    .btn.ghost { 
+      background:transparent; 
+      border:1px solid rgba(255,255,255,.12); 
+      color:var(--text); 
+    }
+
+    /* Topbar */
+    .topbar { 
+      display:flex; 
+      align-items:center; 
+      gap:12px; 
+      padding:12px 16px; 
+      position:sticky; 
+      top:0; 
+      background: rgba(15,20,45,0.95);
+      z-index:90; 
+    }
+    
+    .icon-btn { 
+      background:transparent; 
+      border:1px solid rgba(255,255,255,0.08); 
+      padding:6px; 
+      border-radius:8px; 
+      color:var(--text); 
+      cursor:pointer; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      font-size:12px; 
+    }
+    
+    .icon-btn:hover{ 
+      background: rgba(255,255,255,0.06); 
+    }
+    
+    .brand{ 
+      display:flex; 
+      align-items:center; 
+      gap:8px; 
+    }
+    
+    .logo-dot{ 
+      width:12px; 
+      height:12px; 
+      border-radius:50%; 
+      background:radial-gradient(circle,var(--accent),var(--accent2)); 
+      box-shadow:0 0 12px var(--accent); 
+    }
+    
+    .logo-text{ 
+      font-weight:800; 
+      font-size:18px; 
+      background: linear-gradient(90deg,var(--accent2),var(--accent)); 
+      -webkit-background-clip:text; 
+      -webkit-text-fill-color:transparent; 
+    }
+
+    .search-wrap{ 
+      flex:1; 
+    }
+    
+    .search-wrap input{ 
+      width:100%; 
+      padding:10px; 
+      border-radius:10px; 
+      border:1px solid rgba(255,255,255,0.08); 
+      background:var(--glass); 
+      color:var(--text); 
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+      font-size: 14px;
+    }
+
+    /* Content */
+    .main-wrap{ 
+      padding-bottom:120px; 
+    }
+    
+    .hero{ 
+      padding:18px 16px; 
+    }
+    
+    .hero h1{ 
+      margin:0; 
+      font-size:24px; 
+      background: linear-gradient(90deg,var(--accent2),var(--accent)); 
+      -webkit-background-clip:text; 
+      -webkit-text-fill-color:transparent; 
+    }
+    
+    .hero .tag{ 
+      color:var(--muted); 
+      margin-top:6px; 
+      font-size:14px; 
+    }
+    
+    .content{ 
+      padding:8px; 
+    }
+    
+    .view{ 
+      animation:fadeIn .24s ease; 
+    }
+    
+    @keyframes fadeIn { 
+      from{ opacity:.5; transform:translateY(6px) } 
+      to{ opacity:1; transform:none } 
+    }
+
+    /* grid/cards */
+    .grid { 
+      display:grid; 
+      grid-template-columns:repeat(2,1fr); 
+      gap:12px; 
+      padding:12px; 
+    }
+    
+    @media(min-width:800px){ 
+      .grid{ grid-template-columns:repeat(3,1fr); } 
+    }
+    
+    .card{ 
+      background: linear-gradient(180deg,#131a36,var(--card)); 
+      border-radius:12px; 
+      overflow:hidden; 
+      cursor:pointer; 
+      transition: transform .18s cubic-bezier(.2,.9,.3,1), box-shadow .18s; 
+      position:relative; 
+    }
+    
+    .card:hover{ 
+      transform: translateY(-6px); 
+      box-shadow:0 20px 50px rgba(0,0,0,.7); 
+    }
+    
+    .cover{ 
+      position:relative; 
+    }
+    
+    .cover img{ 
+      width:100%; 
+      height:260px; 
+      object-fit:cover; 
+      display:block; 
+    }
+    
+    .cover::after{ 
+      content:''; 
+      position:absolute; 
+      inset:0; 
+      background: linear-gradient(180deg, rgba(10,12,60,.75), transparent 60%); 
+      pointer-events:none; 
+    }
+    
+    .badge-top{ 
+      position:absolute; 
+      right:10px; 
+      top:10px; 
+      background: linear-gradient(90deg,var(--accent2),var(--accent)); 
+      padding:6px 8px; 
+      border-radius:999px; 
+      color:#fff; 
+      font-weight:800; 
+      box-shadow:0 6px 18px rgba(124,58,237,.25); 
+      font-size:12px; 
+    }
+    
+    .card .meta{ 
+      padding:10px; 
+    }
+    
+    .card .title{ 
+      font-weight:900; 
+      color:#fff; 
+      text-shadow:0 2px 8px rgba(0,0,0,.6); 
+      margin-bottom:6px; 
+    }
+    
+    .rating{ 
+      color:#ffd166; 
+      font-weight:800; 
+      margin-top:6px; 
+    }
+    
+    .muted{ 
+      color:var(--muted); 
+      font-size:14px; 
+      margin:6px 0; 
+    }
+    
+    .actions-inline { 
+      display:flex; 
+      gap:8px; 
+      margin-top:8px; 
+    }
+    
+    .chip { 
+      background:transparent; 
+      border:1px solid rgba(255,255,255,.12); 
+      padding:6px 10px; 
+      border-radius:999px; 
+      color:var(--text); 
+      cursor:pointer; 
+      font-size:12px; 
+      transition:all .2s ease; 
+    }
+    
+    .chip:hover { 
+      background: rgba(255,255,255,0.06); 
+    }
+    
+    .like-btn.liked{ 
+      background: linear-gradient(90deg,var(--accent),var(--accent2)); 
+      color:#fff; 
+      border:none; 
+    }
+
+    /* Detail modal */
+    .modal{ 
+      position:fixed; 
+      inset:0; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      background: rgba(0,0,0,.65); 
+      z-index:300; 
+      padding:12px; 
+    }
+    
+    .pop-anim{ 
+      animation: popIn .42s cubic-bezier(.2,.9,.3,1); 
+    }
+    
+    @keyframes popIn { 
+      0%{ transform:translateY(24px) scale(.94); opacity:0 } 
+      60%{ transform:translateY(-8px) scale(1.02) } 
+      to{ transform:none; opacity:1 } 
+    }
+    
+    .modal-card{ 
+      width:100%; 
+      max-width:920px; 
+      background: linear-gradient(180deg,#0b0f1a,#0a0b16); 
+      border-radius:12px; 
+      padding:12px; 
+      border:1px solid rgba(255,255,255,.06); 
+      max-height:90vh; 
+      overflow-y:auto; 
+      position: relative; 
+    }
+    
+    .detail-body{ 
+      display:flex; 
+      gap:12px; 
+      flex-direction:column; 
+    }
+    
+    @media(min-width:768px){ 
+      .detail-body{ flex-direction:row; } 
+    }
+    
+    .detail-cover{ 
+      width:100%; 
+      height:300px; 
+      object-fit:cover; 
+      border-radius:8px; 
+    }
+    
+    @media(min-width:768px){ 
+      .detail-cover{ width:200px; } 
+    }
+    
+    .detail-info{ 
+      flex:1; 
+    }
+    
+    .meta-row{ 
+      display:flex; 
+      align-items:center; 
+      gap:10px; 
+      margin:12px 0; 
+      flex-wrap:wrap; 
+    }
+    
+    .chap-badge{ 
+      background: linear-gradient(90deg,var(--accent2),var(--accent)); 
+      padding:6px 10px; 
+      border-radius:999px; 
+      color:#fff; 
+      font-weight:700; 
+      font-size:14px; 
+    }
+    
+    .actions-row{ 
+      display:flex; 
+      gap:10px; 
+      margin:16px 0; 
+    }
+    
+    .chapter-list{ 
+      list-style:none; 
+      padding:0; 
+      margin:8px 0 0; 
+      display:flex; 
+      flex-direction:column; 
+      gap:8px; 
+    }
+    
+    .chapter-list li{ 
+      display:flex; 
+      justify-content:space-between; 
+      align-items:center; 
+      padding:8px; 
+      background: rgba(255,255,255,.04); 
+      border-radius:8px; 
+      cursor:pointer; 
+    }
+    
+    .chapter-list li:hover{ 
+      background: rgba(255,255,255,.08); 
+    }
+
+    /* Reader */
+    .reader-page{ 
+      position:fixed; 
+      inset:0; 
+      background: linear-gradient(180deg, #000, #020207); 
+      z-index:400; 
+      display:flex; 
+      flex-direction:column; 
+    }
+    
+    .reader-top{ 
+      display:flex; 
+      align-items:center; 
+      gap:10px; 
+      padding:10px; 
+      background: linear-gradient(90deg, rgba(255,255,255,0.04), transparent); 
+    }
+    
+    .reader-title{ 
+      flex:1; 
+      text-align:center; 
+      font-weight:700; 
+      color: white;
+    }
+    
+    .reader-container{ 
+      flex:1; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      position:relative; 
+      overflow:hidden; 
+    }
+    
+    .reader-slides{ 
+      display:flex; 
+      transition: transform .28s ease; 
+      height:100%; 
+      width:100%; 
+    }
+    
+    .slide{ 
+      min-width:100%; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      background:black; 
+    }
+    
+    .slide img{ 
+      max-width:100%; 
+      max-height:100%; 
+      object-fit:contain; 
+    }
+    
+    .reader-paging{ 
+      position:absolute; 
+      left:50%; 
+      transform:translateX(-50%); 
+      bottom:24px; 
+      display:flex; 
+      gap:6px; 
+    }
+    
+    .dot{ 
+      width:8px; 
+      height:8px; 
+      border-radius:50%; 
+      background: rgba(255,255,255,.12); 
+      transition:background .3s ease; 
+    }
+    
+    .dot.active{ 
+      background:var(--accent); 
+    }
+
+    /* Reader Controls */
+    .reader-controls-panel {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15,20,45,0.9);
+      backdrop-filter: blur(10px);
+      padding: 12px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 410;
+      transition: opacity 0.3s ease;
+      min-width: 250px;
+    }
+    
+    .reader-controls-panel.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .control-label {
+      min-width: 80px;
+      color: white;
+      font-size: 14px;
+    }
+    
+    .control-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      outline: none;
+    }
+    
+    .control-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+    
+    .mode-buttons {
+      display: flex;
+      gap: 6px;
+    }
+    
+    .mode-btn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: transparent;
+      color: white;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .mode-btn.active {
+      background: var(--accent);
+    }
+    
+    .reader-fab {
+      position: fixed;
+      right: 20px;
+      bottom: 90px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      z-index: 405;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav{ 
+      position:fixed; 
+      left:10px; 
+      right:10px; 
+      bottom:12px; 
+      height:64px; 
+      display:flex; 
+      gap:8px; 
+      z-index:380; 
+      backdrop-filter: blur(10px); 
+      background: rgba(15,20,45,0.5); 
+      padding:8px; 
+      border-radius:14px; 
+    }
+    
+    .nav-btn{ 
+      flex:1; 
+      padding:10px; 
+      border-radius:12px; 
+      border:1px solid rgba(255,255,255,0.08); 
+      background:transparent; 
+      color:var(--text); 
+      cursor:pointer; 
+      transition:all .3s ease; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      font-weight:600; 
+    }
+    
+    .nav-btn.active{ 
+      background: linear-gradient(90deg,var(--accent2),var(--accent)); 
+      color:#fff; 
+      transform:translateY(-6px); 
+      box-shadow:0 12px 36px rgba(0,0,0,.6); 
+    }
+
+    /* PTR Spinner */
+    .ptr-spinner{ 
+      position:fixed; 
+      left:50%; 
+      top:20px; 
+      transform:translateX(-50%); 
+      z-index:500; 
+      display:none; 
+    }
+    
+    .ptr-spinner.show{ 
+      display:block; 
+    }
+    
+    .ring{ 
+      width:32px; 
+      height:32px; 
+      border-radius:50%; 
+      border:3px solid rgba(255,255,255,.12); 
+      border-top-color:var(--accent); 
+      animation: spinFast .6s linear infinite; 
+      box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+    }
+    
+    @keyframes spinFast { 
+      to { transform: rotate(360deg); } 
+    }
+
+    /* Loading spinner for cards */
+    .loading-spinner { 
+      display:inline-block; 
+      width:14px; 
+      height:14px; 
+      border:6px solid rgba(255,255,255,.28); 
+      border-radius:50%; 
+      border-top-color:var(--accent); 
+      animation: spinFast .6s linear infinite; 
+    }
+
+    /* Ad Modal */
+    .ad-modal { 
+      position: fixed; 
+      inset: 0; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      background: rgba(0,0,0,.95); 
+      z-index:1000; 
+    }
+    
+    .ad-content { 
+      width:90%; 
+      max-width:400px; 
+      background: linear-gradient(145deg,#0c1020,#0a0d1a); 
+      padding:2rem; 
+      border-radius:16px; 
+      text-align:center; 
+      border:1px solid rgba(124,58,237,0.3); 
+      box-shadow:0 20px 60px rgba(0,0,0,.8); 
+      position:relative; 
+      animation: popIn .5s ease;
+    }
+    
+    .ad-content h3{ 
+      margin-bottom:1rem; 
+      color:var(--accent); 
+    }
+    
+    .ad-content p{ 
+      color:var(--muted); 
+      margin-bottom:1.5rem; 
+    }
+    
+    .ad-timer{ 
+      font-size:2rem; 
+      font-weight:700; 
+      color:var(--accent); 
+      margin:1rem 0; 
+    }
+    
+    .ad-close-x { 
+      position:absolute; 
+      right:10px; 
+      top:10px; 
+      background:transparent; 
+      border:none; 
+      color:var(--muted); 
+      font-size:20px; 
+      cursor:pointer; 
+      padding:6px; 
+      border-radius:8px; 
+    }
+    
+    .ad-close-x:hover { 
+      background: rgba(255,255,255,0.03); 
+      color: #fff; 
+    }
+
+    .hidden { 
+      display:none !important; 
+    }
+    
+    .text-center { 
+      text-align:center; 
+    }
+    
+    .mt-2 { 
+      margin-top:20px; 
+    }
+    
+    .mb-2 { 
+      margin-bottom:20px; 
+    }
+    
+    .pull-to-refresh { 
+      position:absolute; 
+      top:-50px; 
+      left:0; 
+      right:0; 
+      text-align:center; 
+      color:var(--muted); 
+    }
+
+    .novel-reader{ 
+      padding:20px; 
+      max-width:800px; 
+      margin:0 auto; 
+      line-height:1.8; 
+      font-size:18px; 
+      color: var(--text); 
+    }
+    
+    .reader-controls{ 
+      position:fixed; 
+      bottom:80px; 
+      left:0; 
+      right:0; 
+      display:flex; 
+      justify-content:center; 
+      gap:10px; 
+      padding:10px; 
+      background: rgba(15,20,45,0.5); 
+      backdrop-filter: blur(10px); 
+    }
+    
+    /* Smart reading mode for novels */
+    .reading-mode-sepia {
+      --bg: #f5e8d3;
+      --text: #5a4c39;
+      --muted: #8a7860;
+      --glass: rgba(90, 76, 57, 0.08);
+    }
+    
+    .reading-mode-dark {
+      --bg: #0a0a12;
+      --text: #e0e0e0;
+      --muted: #a0a0b0;
+      --glass: rgba(255, 255, 255, 0.08);
+    }
+    
+    /* Continue reading section */
+    .continue-reading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      margin: 16px;
+      background: linear-gradient(90deg, rgba(124,58,237,0.15), rgba(43,109,246,0.15));
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    
+    .continue-cover {
+      width: 60px;
+      height: 80px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+    
+    .continue-info {
+      flex: 1;
+    }
+    
+    .continue-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: white;
+    }
+    
+    .continue-chapter {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    
+    .progress-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+    }
+    
+    /* Error message styling */
+    .error-message {
+      padding: 16px;
+      text-align: center;
+      color: white;
+      background: rgba(239, 68, 68, 0.2);
+      border-radius: 8px;
+      margin: 16px;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+    }
+    
+    /* User stats */
+    .user-stats {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      justify-content: center;
+    }
+    
+    .stat-item {
+      text-align: center;
+      background: rgba(255,255,255,0.05);
+      padding: 10px;
+      border-radius: 8px;
+      min-width: 80px;
+    }
+    
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    /* Read Later badge */
+    .readlater-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--accent);
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    
+    /* Two-step ad modal */
+    .ad-step {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    
+    .ad-progress {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 1rem 0;
+    }
+    
+    .ad-progress-step {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .ad-progress-step.active {
+      background: var(--accent);
+    }
+
+    /* New styles for Swiper reader */
+    .swiper {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .swiper-slide {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+    }
+    
+    .swiper-slide img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    
+    .swiper-zoom-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .swiper-pagination-bullet-active {
+      background: var(--accent);
+    }
+    
+    .unlock-btn {
+      margin-top: 1rem;
+      width: 100%;
+    }
+    
+    .ad-simulator {
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 20px 0;
+    }
+    
+    .ad-simulator p {
+      margin-bottom: 15px;
+      color: white;
+    }
+
+    /* Ad containers */
+    .ad-container {
+      width: 100%;
+      margin: 10px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 90px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .banner-ad {
+      width: 100%;
+      height: 90px;
+    }
+    
+    .interstitial-ad {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      height: 480px;
+      z-index: 1001;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    
+    .rewarded-ad {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 300px;
+      z-index: 1001;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    
+    .ad-label {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      z-index: 10;
+    }
+    
+    .ad-close-btn {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <!-- Splash -->
+  <div id="splash" class="splash">
+    <div class="splash-stack">
+      <div class="rotor">
+        <div class="panel p1"></div>
+        <div class="panel p2"></div>
+        <div class="panel p3"></div>
+      </div>
+      <div class="logo-text" style="font-size:2rem; margin-bottom:1rem;">Rovel</div>
+      <div class="typing" aria-label="Loading Rovel..."><span id="typingText"></span></div>
+      <div class="shatter"></div>
+    </div>
+  </div>
+
+  <!-- Guest -->
+  <div id="guestModal" class="guest-modal hidden">
+    <div class="guest-card">
+      <button class="modal-close" id="guestClose">✕</button>
+      <h3>Welcome to Rovel</h3>
+      <p>Enter your name to get started with the ultimate manga and novel experience</p>
+      <input id="guestName" placeholder="Your name" autocomplete="off"/>
+      <div class="g-actions">
+        <button id="guestSave" class="btn primary">Continue Reading</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ad Modal (Two-step ads) -->
+  <div id="adModal" class="ad-modal hidden">
+    <div class="ad-content">
+      <button class="modal-close" id="adClose">✕</button>
+      <h3 id="adStepTitle">Support Rovel</h3>
+      <p id="adStepDescription">Watch a short ad to continue reading. This helps us keep the app free!</p>
+      
+      <div class="ad-step">Step <span id="currentStep">1</span> of 2</div>
+      <div class="ad-progress">
+        <div class="ad-progress-step active" id="step1"></div>
+        <div class="ad-progress-step" id="step2"></div>
+      </div>
+      
+      <div class="ad-timer" id="adTimer">40</div>
+      <p>Thank you for your support!</p>
+      
+      <div class="actions-row">
+        <button id="adCancel" class="btn ghost">Cancel</button>
+        <button id="adContinue" class="btn primary" disabled>Continue in <span id="adSeconds">40</span>s</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo-dot"></span>
+        <span class="logo-text">Rovel</span>
+      </div>
+      <div class="search-wrap">
+        <input id="searchInput" placeholder="Search manga or novels..." type="search" />
+      </div>
+      <div class="top-right" style="display: flex; align-items: center; gap: 8px;">
+        <div id="userAvatar" class="user-avatar hidden"></div>
+        <span id="userName" class="user-name"></span>
+        <button id="readLaterBtn" class="icon-btn" aria-label="Read Later" style="position: relative;">
+          📖
+          <span id="readLaterCount" class="readlater-badge" style="display: none;">0</span>
+        </button>
+        <button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙</button>
+      </div>
+    </header>
+
+    <main class="main-wrap">
+      <section class="hero">
+        <h1>Rovel Manga & Novels</h1>
+        <p class="tag">Discover the best manga and novels with our purple-blue theme</p>
+      </section>
+
+      <!-- Banner Ad Container -->
+      <div class="ad-container" id="bannerAd">
+        <div class="banner-ad" id="banner-ad-slot"></div>
+      </div>
+
+      <div class="content">
+        <div id="homeView" class="view">
+          <h3 class="text-center mt-2">Newest Content</h3>
+          <div class="grid" id="homeGrid">
+            <div class="loading-spinner"></div> Loading...
+          </div>
+        </div>
+
+        <div id="trendingView" class="view hidden">
+          <h3 class="text-center mt-2">Trending Now</h3>
+          <div class="grid" id="trendingGrid">
+            <div class="loading-spinner"></div> Loading...
+          </div>
+        </div>
+
+        <div id="novelView" class="view hidden">
+          <h3 class="text-center mt-2">Novel Collection</h3>
+          <div class="grid" id="novelGrid">
+            <div class="loading-spinner"></div> Loading...
+          </div>
+        </div>
+
+        <div id="readlaterView" class="view hidden">
+          <h3 class="text-center mt-2">Your Reading List</h3>
+          <div class="grid" id="readlaterGrid">
+            <div class="loading-spinner"></div> Loading...
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-tab="home">Home</button>
+      <button class="nav-btn" data-tab="trending">Trending</button>
+      <button class="nav-btn" data-tab="novel">Novel</button>
+      <button class="nav-btn" data-tab="readlater">Read Later</button>
+    </nav>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" class="modal hidden">
+    <div class="modal-card pop-anim">
+      <button class="modal-close" id="detailClose">✕</button>
+      <div class="detail-body">
+        <img id="detailCover" class="detail-cover" alt="cover"/>
+        <div class="detail-info">
+          <h3 id="detailTitle"></h3>
+          <div id="detailRating" class="rating"></div>
+          <p id="detailDesc"></p>
+          <div class="meta-row">
+            <span id="chapBadge" class="chap-badge"></span>
+            <button id="bookmarkToggle" class="chip">Read Later</button>
+            <button id="likeToggle" class="chip">♡ Like</button>
+          </div>
+          <div class="actions-row"><button id="readBtn" class="btn primary">Read First Chapter</button></div>
+
+          <h4>Chapters</h4>
+          <ul id="chapterList" class="chapter-list"></ul>
+
+          <div class="settings-section mt-2">
+            <h4>Details</h4>
+            <div class="muted">Author: <span id="detailAuthor">Unknown</span></div>
+            <div class="muted">Status: <span id="detailStatus">Ongoing</span></div>
+            <div class="muted">Genres: <span id="detailGenres">Action, Adventure</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reader -->
+  <div id="readerPage" class="reader-page hidden">
+    <div class="reader-top">
+      <button id="readerBack" class="icon-btn" aria-label="Back">←</button>
+      <div id="readerTitle" class="reader-title">Reader</div>
+      <div class="reader-actions">
+        <button id="readerSettings" class="icon-btn" aria-label="Reader settings">⚙</button>
+        <button id="readingModeToggle" class="icon-btn" aria-label="Reading mode">📖</button>
+      </div>
+    </div>
+    <div id="readerContainer" class="reader-container">
+      <!-- Swiper container for manga reader -->
+      <div class="swiper" id="mangaSwiper">
+        <div class="swiper-wrapper" id="swiperWrapper"></div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-scrollbar"></div>
+      </div>
+      
+      <!-- Novel reader content -->
+      <div id="readerContent">
+        <!-- Content will be loaded here based on type -->
+      </div>
+    </div>
+
+    <div id="readerControls" class="reader-controls hidden">
+      <button id="prevPage" class="btn ghost">Previous</button>
+      <button id="nextPage" class="btn primary">Next</button>
+    </div>
+    
+    <!-- Reader FAB and Controls Panel -->
+    <div id="readerFab" class="reader-fab hidden">⚙</div>
+    <div id="readerControlsPanel" class="reader-controls-panel hidden">
+      <div class="control-row">
+        <span class="control-label">Brightness</span>
+        <input type="range" min="0" max="100" value="80" class="control-slider" id="brightnessSlider">
+      </div>
+      <div class="control-row" id="fontSizeControl">
+        <span class="control-label">Font Size</span>
+        <input type="range" min="14" max="24" value="18" class="control-slider" id="fontSizeSlider">
+      </div>
+      <div class="control-row">
+        <span class="control-label">Background</span>
+        <div class="mode-buttons">
+          <button class="mode-btn" data-mode="dark">Dark</button>
+          <button class="mode-btn" data-mode="light">Light</button>
+          <button class="mode-btn" data-mode="sepia">Sepia</button>
+        </div>
+      </div>
+      <div class="control-row">
+        <span class="control-label">Direction</span>
+        <div class="mode-buttons">
+          <button class="mode-btn active" data-direction="ltr">L→R</button>
+          <button class="mode-btn" data-direction="rtl">R→L</button>
+          <button class="mode-btn" data-direction="vertical">Vertical</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-card">
+      <button class="modal-close" id="settingsClose">✕</button>
+      <h3>Settings</h3>
+      
+      <div class="user-stats">
+        <div class="stat-item">
+          <div class="stat-value" id="chaptersRead">0</div>
+          <div class="stat-label">Chapters Read</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="likesGiven">0</div>
+          <div class="stat-label">Likes Given</div>
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h4>Appearance</h4>
+        <div class="settings-option">
+          <label>Theme</label>
+          <select id="themeSelect">
+            <option value="dark">Dark — Black/PurpleBlue</option>
+            <option value="light">Light — PurpleBlue</option>
+          </select>
+        </div>
+        <div class="settings-option">
+          <label>Reading Mode</label>
+          <select id="readingMode">
+            <option value="default">Default</option>
+            <option value="sepia">Sepia</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4>Personalization</h4>
+        <div class="settings-option">
+          <label>Recommendations</label>
+          <select id="recommendations">
+            <option value="enabled">Enabled</option>
+            <option value="disabled">Disabled</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4>Data Usage</h4>
+        <div class="settings-option">
+          <label>Clear Cache</label>
+          <button class="btn ghost" id="clearCache">Clear Now</button>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="settings-section">
+        <h4>Privacy Policy</h4>
+        <p>Your privacy is important to us. We only collect necessary data to provide you with the best reading experience and never share your personal information with third parties.</p>
+      </div>
+
+      <div class="actions-row">
+        <button id="closeSettings" class="btn primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PTR Spinner -->
+  <div id="ptrSpinner" class="ptr-spinner">
+    <div class="ring"></div>
+  </div>
+
+  <!-- Ad Containers -->
+  <div id="interstitialAd" class="interstitial-ad hidden">
+    <button class="ad-close-btn" id="closeInterstitial">✕</button>
+    <span class="ad-label">Ad</span>
+    <div id="interstitial-ad-slot"></div>
+  </div>
+
+  <div id="rewardedAd" class="rewarded-ad hidden">
+    <button class="ad-close-btn" id="closeRewarded">✕</button>
+    <span class="ad-label">Rewarded Ad</span>
+    <div id="rewarded-ad-slot"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script>
+    // Configuration
+    const API_BASE_URL = window.location.origin;
+    let mangaData = [], novelData = [], allPosts = [];
+    let currentReadingMode = 'default';
+    let readerControlsTimeout;
+    let currentReaderItem = null;
+    let currentReaderChapter = null;
+    let currentAdStep = 1;
+    let totalAdSteps = 2;
+    let adCountdownInterval;
+    let mangaSwiper = null;
+    let guestId = null;
+    
+    // Dynamic Ads Configuration
+    let adsConfig = {
+      enabled: true,
+      adUnits: {
+        BANNER: 'ca-app-pub-3940256099942544/9257395921',
+        INTERSTITIAL: 'ca-app-pub-3940256099942544/1033173712',
+        REWARDED: 'ca-app-pub-3940256099942544/5224354917',
+        REWARDED_INTERSTITIAL: 'ca-app-pub-3940256099942544/5354046379'
+      },
+      adFrequency: {
+        TAB_SWITCH: 0.3,
+        CHAPTER_UNLOCK: 1.0
+      }
+    };
+
+    // Error messages in Roman Urdu
+    const errorMessages = {
+      loadError: "No posts available. Please check your internet.",
+      searchError: "Search complete nahi ho saka. Phir try karein.",
+      generalError: "Kuch ghalat ho gaya. Phir try karein.",
+      adNotWatched: "Bhai pehle ad dekh lo phir chapter unlock hoga.",
+      chapterNotFound: "Ye chapter available nahi hai."
+    };
+
+    // Initialize Google Ad Manager
+    function initializeGoogleAdManager() {
+      window.googletag = window.googletag || {cmd: []};
+      googletag.cmd.push(function() {
+        // Define banner ad slot
+        if (adsConfig.adUnits.BANNER) {
+          googletag.defineSlot(adsConfig.adUnits.BANNER, [320, 100], 'banner-ad-slot')
+            .addService(googletag.pubads());
+        }
+        
+        // Define interstitial ad slot
+        if (adsConfig.adUnits.INTERSTITIAL) {
+          googletag.defineSlot(adsConfig.adUnits.INTERSTITIAL, [320, 480], 'interstitial-ad-slot')
+            .addService(googletag.pubads());
+        }
+        
+        // Define rewarded ad slot
+        if (adsConfig.adUnits.REWARDED) {
+          googletag.defineSlot(adsConfig.adUnits.REWARDED, [300, 300], 'rewarded-ad-slot')
+            .addService(googletag.pubads());
+        }
+        
+        // Enable services
+        googletag.pubads().enableSingleRequest();
+        googletag.enableServices();
+      });
+    }
+
+    // Load ads configuration from server
+    async function loadAdsConfig() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/ads-config`);
+        if (response.ok) {
+          const config = await response.json();
+          adsConfig = config;
+          console.log('Ads configuration loaded successfully');
+        } else {
+          console.warn('Failed to load ads config, using fallback');
+        }
+      } catch (err) {
+        console.error('Error loading ads config:', err);
+      }
+      
+      // Initialize Google Ad Manager with the loaded configuration
+      initializeGoogleAdManager();
+    }
+
+    // Generate or retrieve guest ID
+    async function getGuestId() {
+      // Check if we already have a guest ID in localStorage
+      guestId = localStorage.getItem('guestId');
+      
+      if (!guestId) {
+        // Fallback: generate a local guest ID
+        guestId = 'guest-' + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('guestId', guestId);
+        localStorage.setItem('userName', 'Guest');
+        document.getElementById('userName').textContent = 'Guest';
+        updateUserAvatar('Guest');
+      } else {
+        // We already have a guest ID, get the user name
+        const userName = localStorage.getItem('userName') || 'Guest';
+        document.getElementById('userName').textContent = userName;
+        updateUserAvatar(userName);
+      }
+      
+      return guestId;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load ads configuration first
+      loadAdsConfig().then(() => {
+        // Prevent right-click and image drag
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.querySelectorAll('img').forEach(img => img.addEventListener('dragstart', e => e.preventDefault()));
+        
+        // Initialize app
+        initApp();
+
+        // Show app after splash screen
+        setTimeout(async () => { 
+          document.getElementById('splash').classList.add('hidden'); 
+          
+          // Get or create guest ID
+          await getGuestId();
+          
+          // Only show guest modal if no user name exists
+          if (!localStorage.getItem('userName') || localStorage.getItem('userName') === 'Guest') {
+            document.getElementById('guestModal').classList.remove('hidden'); 
+          } else {
+            document.getElementById('app').classList.remove('hidden');
+            loadUserStats();
+            updateReadLaterCount();
+            loadContentFromAPI();
+            
+            // Load banner ad if enabled
+            if (adsConfig.enabled) {
+              loadBannerAd();
+            }
+          }
+        }, 2500);
+
+        // Close modals when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+              modal.classList.add('hidden');
+            }
+          });
+        });
+
+        // Close buttons for modals
+        document.getElementById('guestClose').addEventListener('click', () => {
+          document.getElementById('guestModal').classList.add('hidden');
+        });
+        
+        document.getElementById('detailClose').addEventListener('click', () => {
+          document.getElementById('detailModal').classList.add('hidden');
+        });
+        
+        document.getElementById('settingsClose').addEventListener('click', () => {
+          document.getElementById('settingsModal').classList.add('hidden');
+        });
+
+        // Ad modal close button
+        document.getElementById('adClose').addEventListener('click', () => {
+          document.getElementById('adModal').classList.add('hidden');
+          clearInterval(adCountdownInterval);
+        });
+
+        // Close ad buttons
+        document.getElementById('closeInterstitial').addEventListener('click', () => {
+          document.getElementById('interstitialAd').classList.add('hidden');
+        });
+        
+        document.getElementById('closeRewarded').addEventListener('click', () => {
+          document.getElementById('rewardedAd').classList.add('hidden');
+        });
+
+        // Guest modal save
+        document.getElementById('guestSave').addEventListener('click', () => {
+          const name = document.getElementById('guestName').value || 'Guest';
+          document.getElementById('userName').textContent = name;
+          localStorage.setItem('userName', name);
+          updateUserAvatar(name);
+          document.getElementById('guestModal').classList.add('hidden');
+          document.getElementById('app').classList.remove('hidden');
+          loadUserStats();
+          updateReadLaterCount();
+          loadContentFromAPI();
+          
+          // Load banner ad after guest login if enabled
+          if (adsConfig.enabled) {
+            loadBannerAd();
+          }
+        });
+
+        // Check if user already exists
+        const userName = localStorage.getItem('userName');
+        if (userName && userName !== 'Guest') {
+          document.getElementById('splash').classList.add('hidden');
+          document.getElementById('guestModal').classList.add('hidden');
+          document.getElementById('app').classList.remove('hidden');
+          document.getElementById('userName').textContent = userName;
+          updateUserAvatar(userName);
+          loadUserStats();
+          updateReadLaterCount();
+          loadContentFromAPI();
+          
+          // Load banner ad if enabled
+          if (adsConfig.enabled) {
+            loadBannerAd();
+          }
+        }
+
+        // Settings button
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+          loadUserStats();
+          document.getElementById('settingsModal').classList.remove('hidden');
+        });
+        
+        document.getElementById('closeSettings').addEventListener('click', () => {
+          document.getElementById('settingsModal').classList.add('hidden');
+        });
+
+        // Tab navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab + 'View').classList.remove('hidden');
+            
+            // Close detail modal when changing tabs
+            document.getElementById('detailModal').classList.add('hidden');
+            
+            // Load appropriate content for the tab
+            if (btn.dataset.tab === 'home') loadHomeContent();
+            else if (btn.dataset.tab === 'trending') loadTrendingContent();
+            else if (btn.dataset.tab === 'novel') loadNovelContent();
+            else if (btn.dataset.tab === 'readlater') loadReadLaterContent();
+            
+            // Show interstitial ad occasionally when switching tabs if enabled
+            if (adsConfig.enabled && Math.random() < adsConfig.adFrequency.TAB_SWITCH) {
+              showInterstitialAd();
+            }
+          });
+        });
+
+        // Read Later button
+        document.getElementById('readLaterBtn').addEventListener('click', () => {
+          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+          document.querySelector('[data-tab="readlater"]').classList.add('active');
+          document.getElementById('readlaterView').classList.remove('hidden');
+          loadReadLaterContent();
+        });
+
+        // Reader back button
+        document.getElementById('readerBack').addEventListener('click', () => {
+          document.getElementById('readerPage').classList.add('hidden');
+          // Reset reading mode when leaving reader
+          document.body.classList.remove('reading-mode-sepia', 'reading-mode-dark');
+          currentReadingMode = 'default';
+          // Hide reader controls
+          document.getElementById('readerFab').classList.add('hidden');
+          document.getElementById('readerControlsPanel').classList.add('hidden');
+          
+          // Destroy swiper instance when leaving reader
+          if (mangaSwiper) {
+            mangaSwiper.destroy(true, true);
+            mangaSwiper = null;
+          }
+          
+          // Show interstitial ad when leaving reader if enabled
+          if (adsConfig.enabled) {
+            showInterstitialAd();
+          }
+        });
+
+        // Reading mode toggle in reader
+        document.getElementById('readingModeToggle').addEventListener('click', () => {
+          const modes = ['default', 'sepia', 'dark'];
+          const currentIndex = modes.indexOf(currentReadingMode);
+          const nextIndex = (currentIndex + 1) % modes.length;
+          currentReadingMode = modes[nextIndex];
+          
+          // Remove all reading mode classes
+          document.body.classList.remove('reading-mode-sepia', 'reading-mode-dark');
+          
+          // Add the new reading mode class if not default
+          if (currentReadingMode !== 'default') {
+            document.body.classList.add(`reading-mode-${currentReadingMode}`);
+          }
+          
+          // Update button text for visual feedback
+          const modeLabels = {
+            'default': '📖', 
+            'sepia': '🌞', 
+            'dark': '🌙'
+          };
+          document.getElementById('readingModeToggle').textContent = modeLabels[currentReadingMode];
+        });
+
+        // Reader FAB toggle
+        document.getElementById('readerFab').addEventListener('click', () => {
+          const controlsPanel = document.getElementById('readerControlsPanel');
+          controlsPanel.classList.toggle('hidden');
+          resetReaderControlsTimer();
+        });
+
+        // Reader controls
+        document.getElementById('brightnessSlider').addEventListener('input', (e) => {
+          const value = e.target.value;
+          document.getElementById('readerContainer').style.filter = `brightness(${value}%)`;
+          resetReaderControlsTimer();
+        });
+
+        document.getElementById('fontSizeSlider').addEventListener('input', (e) => {
+          const value = e.target.value;
+          const readerContent = document.querySelector('.novel-reader');
+          if (readerContent) {
+            readerContent.style.fontSize = `${value}px`;
+          }
+          resetReaderControlsTimer();
+        });
+
+        document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const mode = btn.dataset.mode;
+            document.body.classList.remove('reading-mode-sepia', 'reading-mode-dark');
+            if (mode !== 'dark') {
+              document.body.classList.add(`reading-mode-${mode}`);
+            }
+            resetReaderControlsTimer();
+          });
+        });
+
+        document.querySelectorAll('.mode-btn[data-direction]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.mode-btn[data-direction]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // Implementation for reading direction would go here
+            resetReaderControlsTimer();
+          });
+        });
+
+        // Hide controls when tapping on reader content
+        document.getElementById('readerContainer').addEventListener('click', (e) => {
+          if (e.target.closest('.reader-controls-panel') === null && 
+              e.target.closest('.reader-fab') === null) {
+            document.getElementById('readerControlsPanel').classList.add('hidden');
+          }
+        });
+
+        // Theme selection
+        document.getElementById('themeSelect').addEventListener('change', (e) => {
+          document.documentElement.setAttribute('data-theme', e.target.value);
+          localStorage.setItem('theme', e.target.value);
+        });
+        
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeSelect').value = savedTheme;
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+          const searchTerm = e.target.value.toLowerCase().trim();
+          if (searchTerm.length > 2) {
+            performSearch(searchTerm);
+          } else if (searchTerm.length === 0) {
+            // Reset views if search is cleared
+            const activeTab = document.querySelector('.nav-btn.active').dataset.tab;
+            if (activeTab === 'home') loadHomeContent();
+            else if (activeTab === 'trending') loadTrendingContent();
+            else if (activeTab === 'novel') loadNovelContent();
+            else if (activeTab === 'readlater') loadReadLaterContent();
+          }
+        });
+
+        // Ad modal handlers
+        document.getElementById('adCancel').addEventListener('click', () => {
+          clearInterval(adCountdownInterval);
+          document.getElementById('adModal').classList.add('hidden');
+        });
+
+        document.getElementById('adContinue').addEventListener('click', () => {
+          clearInterval(adCountdownInterval);
+          if (currentAdStep < totalAdSteps) {
+            // Show next ad
+            currentAdStep++;
+            startAdCountdown();
+          } else {
+            // Ads completed, unlock chapter
+            document.getElementById('adModal').classList.add('hidden');
+            unlockChapter();
+          }
+        });
+
+        // PTR (pull to refresh)
+        let startY = 0, currentY = 0, ptrActive = false;
+        document.addEventListener('touchstart', e => { 
+          if (window.scrollY === 0) startY = e.touches[0].pageY; 
+        });
+        
+        document.addEventListener('touchmove', e => {
+          currentY = e.touches[0].pageY;
+          if (window.scrollY === 0 && currentY > startY && !ptrActive) {
+            ptrActive = true;
+            document.getElementById('ptrSpinner').classList.add('show');
+          }
+        });
+        
+        document.addEventListener('touchend', () => {
+          if (ptrActive) {
+            setTimeout(() => {
+              document.getElementById('ptrSpinner').classList.remove('show');
+              ptrActive = false;
+              const activeTab = document.querySelector('.nav-btn.active').dataset.tab;
+              if (activeTab === 'home') loadContentFromAPI();
+              else if (activeTab === 'trending') loadTrendingContent();
+              else if (activeTab === 'novel') loadNovelContent();
+              else if (activeTab === 'readlater') loadReadLaterContent();
+            }, 800);
+          }
+        });
+        
+        // Handle visibility change to protect content
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden && !document.getElementById('readerPage').classList.contains('hidden')) {
+            // Blank reader content when tab is hidden
+            document.getElementById('readerContent').style.display = 'none';
+          } else {
+            // Restore content when tab is visible again
+            document.getElementById('readerContent').style.display = 'block';
+          }
+        });
+      });
+    });
+
+    // Ad Functions
+    function loadBannerAd() {
+      if (!adsConfig.enabled || !adsConfig.adUnits.BANNER) return;
+      
+      googletag.cmd.push(function() {
+        googletag.display('banner-ad-slot');
+      });
+    }
+    
+    function showInterstitialAd() {
+      if (!adsConfig.enabled || !adsConfig.adUnits.INTERSTITIAL) return;
+      
+      document.getElementById('interstitialAd').classList.remove('hidden');
+      
+      googletag.cmd.push(function() {
+        googletag.display('interstitial-ad-slot');
+      });
+    }
+    
+    function showRewardedAd() {
+      if (!adsConfig.enabled || !adsConfig.adUnits.REWARDED) return;
+      
+      document.getElementById('rewardedAd').classList.remove('hidden');
+      
+      googletag.cmd.push(function() {
+        googletag.display('rewarded-ad-slot');
+      });
+    }
+
+    function initApp() {
+      const typingText = document.getElementById('typingText');
+      const text = "Loading Rovel...";
+      let i = 0;
+      const typingInterval = setInterval(() => {
+        if (i < text.length) { 
+          typingText.textContent += text.charAt(i); 
+          i++; 
+        } else {
+          clearInterval(typingInterval);
+        }
+      }, 100);
+    }
+    
+    function updateUserAvatar(name) {
+      const avatar = document.getElementById('userAvatar');
+      avatar.textContent = name.charAt(0).toUpperCase();
+      avatar.classList.remove('hidden');
+    }
+    
+    function loadUserStats() {
+      const chaptersRead = parseInt(localStorage.getItem('chaptersRead') || '0');
+      const likesGiven = parseInt(localStorage.getItem('likesGiven') || '0');
+      
+      document.getElementById('chaptersRead').textContent = chaptersRead;
+      document.getElementById('likesGiven').textContent = likesGiven;
+    }
+    
+    function updateUserStat(stat) {
+      const currentValue = parseInt(localStorage.getItem(stat) || '0');
+      localStorage.setItem(stat, currentValue + 1);
+      loadUserStats();
+    }
+
+    function updateReadLaterCount() {
+      const readLaterItems = JSON.parse(localStorage.getItem('readLater') || '[]');
+      const countEl = document.getElementById('readLaterCount');
+      
+      if (readLaterItems.length > 0) {
+        countEl.textContent = readLaterItems.length;
+        countEl.style.display = 'block';
+      } else {
+        countEl.style.display = 'none';
+      }
+    }
+
+    async function loadContentFromAPI() {
+      try {
+        document.getElementById('homeGrid').innerHTML = '<div class="loading-spinner"></div> Loading...';
+        
+        // Fetch from server
+        const response = await fetch(`${API_BASE_URL}/api/data`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        
+        allPosts = await response.json();
+        mangaData = allPosts.filter(item => item.type === 'manga');
+        novelData = allPosts.filter(item => item.type === 'novel');
+        
+        loadHomeContent(); 
+        loadTrendingContent(); 
+        loadNovelContent();
+      } catch (err) {
+        console.error('Failed to load data from API:', err);
+        showError(errorMessages.loadError);
+        // Clear all data arrays
+        mangaData = []; 
+        novelData = [];
+        allPosts = [];
+        // Show error in all grids
+        document.querySelectorAll('.grid').forEach(grid => {
+          grid.innerHTML = `<div class="error-message">${errorMessages.loadError}</div>`;
+        });
+      }
+    }
+    
+    function performSearch(searchTerm) {
+      try {
+        // Filter posts based on search term in title, author, or genres
+        const filteredPosts = allPosts.filter(item => 
+          item.title.toLowerCase().includes(searchTerm) || 
+          (item.author && item.author.toLowerCase().includes(searchTerm)) ||
+          (item.genres && item.genres.toLowerCase().includes(searchTerm))
+        );
+        
+        const activeTab = document.querySelector('.nav-btn.active').dataset.tab;
+        const gridElement = document.getElementById(activeTab + 'Grid');
+        
+        if (gridElement) {
+          gridElement.innerHTML = '';
+          
+          if (filteredPosts.length === 0) {
+            gridElement.innerHTML = `<p class="text-center">No results found for "${searchTerm}"</p>`;
+            return;
+          }
+          
+          if (activeTab === 'novel') {
+            filteredPosts.filter(item => item.type === 'novel').forEach(novel => {
+              gridElement.appendChild(createPostCard(novel));
+            });
+          } else if (activeTab === 'readlater') {
+            const readLaterItems = JSON.parse(localStorage.getItem('readLater') || '[]');
+            filteredPosts.filter(item => readLaterItems.includes(item.id)).forEach(post => {
+              gridElement.appendChild(createPostCard(post));
+            });
+          } else {
+            filteredPosts.forEach(post => {
+              gridElement.appendChild(createPostCard(post));
+            });
+          }
+        }
+      } catch (err) {
+        showError(errorMessages.searchError);
+      }
+    }
+    
+    function showError(message) {
+      // Create or show error message element
+      let errorEl = document.getElementById('errorMessage');
+      if (!errorEl) {
+        errorEl = document.createElement('div');
+        errorEl.id = 'errorMessage';
+        errorEl.className = 'error-message';
+        document.querySelector('.content').prepend(errorEl);
+      }
+      
+      errorEl.textContent = message;
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        errorEl.remove();
+      }, 5000);
+    }
+
+    function loadHomeContent() {
+      const homeGrid = document.getElementById('homeGrid');
+      homeGrid.innerHTML = '';
+      
+      if (allPosts.length === 0) {
+        homeGrid.innerHTML = `<div class="error-message">${errorMessages.loadError}</div>`;
+        return;
+      }
+      
+      // Sort by created_at (newest first)
+      const sortedPosts = [...allPosts].sort((a, b) => {
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+      
+      sortedPosts.forEach(post => homeGrid.appendChild(createPostCard(post)));
+    }
+
+    function loadTrendingContent() {
+      const trendingGrid = document.getElementById('trendingGrid');
+      trendingGrid.innerHTML = '';
+      
+      if (allPosts.length === 0) {
+        trendingGrid.innerHTML = `<div class="error-message">${errorMessages.loadError}</div>`;
+        return;
+      }
+      
+      // Sort by chapters_count (most chapters first)
+      const sortedPosts = [...allPosts].sort((a, b) => {
+        return b.chapters_count - a.chapters_count;
+      });
+      
+      sortedPosts.forEach(post => trendingGrid.appendChild(createPostCard(post)));
+    }
+
+    function loadNovelContent() {
+      const novelGrid = document.getElementById('novelGrid');
+      novelGrid.innerHTML = '';
+      
+      if (novelData.length === 0) {
+        novelGrid.innerHTML = `<div class="error-message">${errorMessages.loadError}</div>`;
+        return;
+      }
+      
+      novelData.forEach(novel => novelGrid.appendChild(createPostCard(novel)));
+    }
+
+    function loadReadLaterContent() {
+      const readlaterGrid = document.getElementById('readlaterGrid');
+      readlaterGrid.innerHTML = '';
+      
+      const readLaterItems = JSON.parse(localStorage.getItem('readLater') || '[]');
+      if (readLaterItems.length === 0) { 
+        readlaterGrid.innerHTML = '<p class="text-center">No items in your reading list yet.</p>'; 
+        return; 
+      }
+      
+      readLaterItems.forEach(itemId => {
+        const post = allPosts.find(p => p.id === itemId);
+        if (post) readlaterGrid.appendChild(createPostCard(post));
+      });
+    }
+
+    function createPostCard(post) {
+      const card = document.createElement('div');
+      card.className = 'card'; 
+      card.dataset.id = post.id; 
+      card.dataset.type = post.type;
+      
+      card.innerHTML = `
+        <div class="cover">
+          <img src="${post.cover}" alt="${post.title}" loading="lazy">
+          <div class="badge-top">${post.rating} ⭐</div>
+        </div>
+        <div class="meta">
+          <div class="title">${post.title}</div>
+          <div class="muted">${post.genres}</div>
+          <div class="muted">${post.chapters_count} chapters</div>
+          <div class="actions-inline">
+            <button class="chip like-btn" aria-label="Like">♡</button>
+            <button class="chip bookmark-btn" aria-label="Read later">Read Later</button>
+          </div>
+        </div>
+      `;
+      
+      card.addEventListener('click', (e) => { 
+        if (!e.target.classList.contains('chip')) openDetailModal(post); 
+      });
+
+      const likeBtn = card.querySelector('.like-btn');
+      likeBtn.addEventListener('click', (e) => { 
+        e.stopPropagation(); 
+        likeBtn.classList.toggle('liked'); 
+        likeBtn.textContent = likeBtn.classList.contains('liked') ? '♥' : '♡'; 
+        if (likeBtn.classList.contains('liked')) {
+          updateUserStat('likesGiven');
+        }
+      });
+
+      const bookmarkBtn = card.querySelector('.bookmark-btn');
+      const readLaterItems = JSON.parse(localStorage.getItem('readLater') || '[]');
+      bookmarkBtn.textContent = readLaterItems.includes(post.id) ? 'Saved' : 'Read Later';
+      
+      bookmarkBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const added = toggleReadLater(post.id);
+        bookmarkBtn.textContent = added ? 'Saved' : 'Read Later';
+        updateReadLaterCount();
+        
+        if (document.querySelector('.nav-btn.active')?.dataset?.tab === 'readlater') {
+          loadReadLaterContent();
+        }
+      });
+
+      return card;
+    }
+
+    function openDetailModal(post) {
+      const detailModal = document.getElementById('detailModal');
+      document.getElementById('detailCover').src = post.cover;
+      document.getElementById('detailTitle').textContent = post.title;
+      document.getElementById('detailRating').textContent = `⭐ ${post.rating}`;
+      document.getElementById('detailDesc').textContent = post.description;
+      document.getElementById('chapBadge').textContent = `${post.chapters_count} Chapters`;
+      document.getElementById('detailAuthor').textContent = post.author || 'Unknown';
+      document.getElementById('detailStatus').textContent = post.status || 'Ongoing';
+      document.getElementById('detailGenres').textContent = post.genres || 'Action, Adventure';
+
+      const bookmarkToggle = document.getElementById('bookmarkToggle');
+      const updateBookmarkText = () => {
+        const readLaterItems = JSON.parse(localStorage.getItem('readLater') || '[]');
+        bookmarkToggle.textContent = readLaterItems.includes(post.id) ? 'Saved' : 'Read Later';
+      };
+      
+      updateBookmarkText();
+
+      const chapterList = document.getElementById('chapterList');
+      chapterList.innerHTML = '';
+      
+      // Fetch chapters for this post
+      fetch(`${API_BASE_URL}/api/manga/${post.id}/chapters`)
+        .then(response => response.json())
+        .then(chapters => {
+          if (chapters && Object.keys(chapters).length > 0) {
+            Object.entries(chapters).forEach(([chapterId, chapter]) => {
+              const li = document.createElement('li');
+              li.textContent = chapter.title;
+              li.dataset.chapterId = chapterId;
+              chapterList.appendChild(li);
+              
+              li.addEventListener('click', () => {
+                showAdModal(post, chapterId, chapter.title);
+              });
+            });
+          } else {
+            chapterList.innerHTML = '<li>No chapters available</li>';
+          }
+        })
+        .catch(err => {
+          console.error('Error loading chapters:', err);
+          chapterList.innerHTML = '<li>Error loading chapters</li>';
+        });
+
+      const readBtn = document.getElementById('readBtn');
+      readBtn.onclick = () => {
+        // Fetch chapters to get the first chapter ID
+        fetch(`${API_BASE_URL}/api/manga/${post.id}/chapters`)
+          .then(response => response.json())
+          .then(chapters => {
+            if (chapters && Object.keys(chapters).length > 0) {
+              const firstChapterId = Object.keys(chapters)[0];
+              const firstChapter = chapters[firstChapterId];
+              showAdModal(post, firstChapterId, firstChapter.title);
+            } else {
+              showError('No chapters available for this content');
+            }
+          })
+          .catch(err => {
+            console.error('Error loading chapters:', err);
+            showError('Error loading chapters');
+          });
+      };
+
+      bookmarkToggle.onclick = (e) => {
+        e.stopPropagation();
+        const added = toggleReadLater(post.id);
+        updateBookmarkText();
+        updateReadLaterCount();
+        
+        if (document.querySelector('.nav-btn.active')?.dataset?.tab === 'readlater') {
+          loadReadLaterContent();
+        }
+      };
+
+      const likeToggle = document.getElementById('likeToggle');
+      likeToggle.onclick = () => { 
+        likeToggle.classList.toggle('liked'); 
+        likeToggle.textContent = likeToggle.classList.contains('liked') ? '♥ Liked' : '♡ Like'; 
+        if (likeToggle.classList.contains('liked')) {
+          updateUserStat('likesGiven');
+        }
+      };
+
+      detailModal.classList.remove('hidden');
+    }
+
+    function showAdModal(post, chapterId, chapterTitle) {
+      currentReaderItem = post;
+      currentReaderChapter = { id: chapterId, title: chapterTitle };
+      currentAdStep = 1;
+      
+      const adModal = document.getElementById('adModal');
+      document.getElementById('adStepTitle').textContent = `Unlock Chapter: ${chapterTitle}`;
+      document.getElementById('adStepDescription').textContent = `Watch ${totalAdSteps} ads (40s each) to unlock this chapter`;
+      document.getElementById('currentStep').textContent = currentAdStep;
+      
+      // Update progress indicators
+      document.getElementById('step1').classList.add('active');
+      document.getElementById('step2').classList.remove('active');
+      
+      adModal.classList.remove('hidden');
+      startAdCountdown();
+    }
+
+    function startAdCountdown() {
+      clearInterval(adCountdownInterval);
+      
+      const adTimer = document.getElementById('adTimer');
+      const adSeconds = document.getElementById('adSeconds');
+      const adContinue = document.getElementById('adContinue');
+      
+      let count = 40;
+      adTimer.textContent = count;
+      adSeconds.textContent = count;
+      adContinue.disabled = true;
+      adContinue.textContent = `Continue in ${count}s`;
+      
+      adCountdownInterval = setInterval(() => {
+        count--;
+        adTimer.textContent = count;
+        adSeconds.textContent = count;
+        adContinue.textContent = count > 0 ? `Continue in ${count}s` : 'Continue';
+        
+        if (count <= 0) {
+          adContinue.disabled = false;
+          // Automatically unlock chapter after 40 seconds
+          clearInterval(adCountdownInterval);
+          document.getElementById('adModal').classList.add('hidden');
+          unlockChapter();
+        }
+      }, 1000);
+    }
+
+    async function unlockChapter() {
+      try {
+        // Show loading state in reader
+        document.getElementById('readerPage').classList.remove('hidden');
+        document.getElementById('readerTitle').textContent = 'Loading...';
+        document.getElementById('readerContent').innerHTML = '<div class="loading-spinner"></div>';
+        
+        // First mark ad as completed (even if it failed)
+        const normalizedTitle = currentReaderItem.title.toLowerCase().replace(/\s+/g, '-');
+        
+        // Try to mark ad as completed, but don't fail if it doesn't work
+        try {
+          await fetch(`${API_BASE_URL}/ads-complete`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              userId: guestId,
+              manga: normalizedTitle,
+              chapterId: currentReaderChapter.id
+            })
+          });
+        } catch (err) {
+          console.warn('Failed to mark ad as completed, but continuing anyway:', err);
+        }
+        
+        // Then fetch chapter content using direct endpoint
+        const response = await fetch(`${API_BASE_URL}/direct-chapter/${normalizedTitle}/${currentReaderChapter.id}`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('chapterNotFound');
+          } else {
+            throw new Error('Failed to load chapter content');
+          }
+        }
+        
+        const chapterContent = await response.json();
+        
+        // Open reader with the fetched content
+        if (currentReaderItem.type === 'manga') {
+          openMangaReader(currentReaderItem, chapterContent);
+        } else {
+          openNovelReader(currentReaderItem, chapterContent);
+        }
+        
+        // Update reading stats
+        updateUserStat('chaptersRead');
+      } catch (err) {
+        console.error('Failed to unlock chapter:', err);
+        
+        if (err.message === 'chapterNotFound') {
+          showError(errorMessages.chapterNotFound);
+        } else {
+          showError('Failed to load chapter content. Please try again.');
+        }
+        
+        document.getElementById('readerPage').classList.add('hidden');
+      }
+    }
+
+    function openMangaReader(manga, chapter) {
+      const readerPage = document.getElementById('readerPage');
+      const readerTitle = document.getElementById('readerTitle');
+      const readerContainer = document.getElementById('readerContainer');
+      
+      readerTitle.textContent = `${manga.title} - ${chapter.title}`;
+      
+      // Hide novel content and show swiper container
+      document.getElementById('readerContent').classList.add('hidden');
+      document.getElementById('mangaSwiper').classList.remove('hidden');
+      
+      // Hide novel-specific controls
+      document.getElementById('fontSizeControl').classList.add('hidden');
+      document.getElementById('readerControls').classList.add('hidden');
+      document.getElementById('readerFab').classList.remove('hidden');
+      
+      // Initialize Swiper
+      const swiperWrapper = document.getElementById('swiperWrapper');
+      swiperWrapper.innerHTML = '';
+      
+      // Add pages to swiper
+      chapter.pages.forEach((pageUrl, index) => {
+        const slide = document.createElement('div');
+        slide.className = 'swiper-slide';
+        
+        const zoomContainer = document.createElement('div');
+        zoomContainer.className = 'swiper-zoom-container';
+        
+        const img = document.createElement('img');
+        img.src = pageUrl;
+        img.alt = `Page ${index + 1}`;
+        img.loading = 'lazy';
+        
+        zoomContainer.appendChild(img);
+        slide.appendChild(zoomContainer);
+        swiperWrapper.appendChild(slide);
+      });
+      
+      // Initialize Swiper with zoom functionality
+      if (mangaSwiper) {
+        mangaSwiper.destroy(true, true);
+      }
+      
+      mangaSwiper = new Swiper('#mangaSwiper', {
+        direction: 'horizontal',
+        loop: false,
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true,
+        },
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+        zoom: {
+          maxRatio: 3,
+          minRatio: 1,
+        },
+        keyboard: {
+          enabled: true,
+        },
+        preloadImages: true,
+        lazy: true,
+      });
+      
+      readerPage.classList.remove('hidden');
+      resetReaderControlsTimer();
+    }
+
+    function openNovelReader(novel, chapter) {
+      const readerPage = document.getElementById('readerPage');
+      const readerTitle = document.getElementById('readerTitle');
+      const readerContent = document.getElementById('readerContent');
+      const readerControls = document.getElementById('readerControls');
+
+      readerTitle.textContent = `${novel.title} - ${chapter.title}`;
+      readerContent.innerHTML = `<div class="novel-reader">${chapter.content}</div>`;
+      
+      // Hide manga swiper and show novel content
+      document.getElementById('mangaSwiper').classList.add('hidden');
+      document.getElementById('readerContent').classList.remove('hidden');
+      
+      // Show novel-specific controls
+      document.getElementById('fontSizeControl').classList.remove('hidden');
+      readerControls.classList.remove('hidden');
+      document.getElementById('readerFab').classList.remove('hidden');
+      
+      // Find the chapter index to enable navigation
+      fetch(`${API_BASE_URL}/api/manga/${novel.id}/chapters`)
+        .then(response => response.json())
+        .then(chapters => {
+          if (chapters) {
+            const chapterIds = Object.keys(chapters);
+            const chapterIndex = chapterIds.findIndex(id => id === currentReaderChapter.id);
+            
+            document.getElementById('prevPage').onclick = () => { 
+              if (chapterIndex > 0) {
+                const prevChapterId = chapterIds[chapterIndex - 1];
+                showAdModal(novel, prevChapterId, chapters[prevChapterId].title);
+              }
+            };
+            
+            document.getElementById('nextPage').onclick = () => { 
+              if (chapterIndex < chapterIds.length - 1) {
+                const nextChapterId = chapterIds[chapterIndex + 1];
+                showAdModal(novel, nextChapterId, chapters[nextChapterId].title);
+              }
+            };
+          }
+        })
+        .catch(err => {
+          console.error('Error loading chapters for navigation:', err);
+        });
+
+      document.getElementById('readerPaging').innerHTML = '';
+      readerPage.classList.remove('hidden');
+      
+      // Reset reading mode to default when opening a novel
+      document.body.classList.remove('reading-mode-sepia', 'reading-mode-dark');
+      currentReadingMode = 'default';
+      document.getElementById('readingModeToggle').textContent = '📖';
+      
+      resetReaderControlsTimer();
+    }
+    
+    function resetReaderControlsTimer() {
+      clearTimeout(readerControlsTimeout);
+      readerControlsTimeout = setTimeout(() => {
+        document.getElementById('readerControlsPanel').classList.add('hidden');
+        document.getElementById('readerFab').classList.add('hidden');
+      }, 3000);
+    }
+
+    function toggleReadLater(itemId) {
+      let readLater = JSON.parse(localStorage.getItem('readLater') || '[]');
+      let added;
+      
+      if (readLater.includes(itemId)) { 
+        readLater = readLater.filter(id => id !== itemId); 
+        added = false; 
+      } else { 
+        readLater.push(itemId); 
+        added = true; 
+      }
+      
+      localStorage.setItem('readLater', JSON.stringify(readLater));
+      return added;
+    }
+  </script>
+</body>
+</html>
