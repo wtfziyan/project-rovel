@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // MongoDB connection
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://mongo:ReijhdfxbdGOWrkHEeygkywQEYcICIxG@yamanote.proxy.rlwy.net:12646';
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://mongo:cEXOerAMAuVQpERFEOYcIXUyopfvvHLC@mongodb.railway.internal:27017';
 const DB_NAME = 'rovel';
 let db, client;
 
