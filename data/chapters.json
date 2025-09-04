@@ -1,0 +1,48 @@
+{
+  "demon-slayer": {
+    "101": {
+      "title": "Cruelty",
+      "pages": [
+        "https://example.com/demon-slayer/101/1.jpg",
+        "https://example.com/demon-slayer/101/2.jpg",
+        "https://example.com/demon-slayer/101/3.jpg",
+        "https://example.com/demon-slayer/101/4.jpg",
+        "https://example.com/demon-slayer/101/5.jpg"
+      ]
+    },
+    "102": {
+      "title": "Final Selection",
+      "pages": [
+        "https://example.com/demon-slayer/102/1.jpg",
+        "https://example.com/demon-slayer/102/2.jpg",
+        "https://example.com/demon-slayer/102/3.jpg",
+        "https://example.com/demon-slayer/102/4.jpg",
+        "https://example.com/demon-slayer/102/5.jpg"
+      ]
+    }
+  },
+  "one-piece": {
+    "201": {
+      "title": "Romance Dawn",
+      "pages": [
+        "https://example.com/one-piece/201/1.jpg",
+        "https://example.com/one-piece/201/2.jpg",
+        "https://example.com/one-piece/201/3.jpg",
+        "https://example.com/one-piece/201/4.jpg",
+        "https://example.com/one-piece/201/5.jpg"
+      ]
+    }
+  },
+  "hi": {
+    "1756643093405": {
+      "title": "hi",
+      "pages": [],
+      "content": null
+    },
+    "1756643119820": {
+      "title": "t5444",
+      "pages": [],
+      "content": null
+    }
+  }
+}

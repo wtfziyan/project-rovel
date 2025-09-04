@@ -1,0 +1,28 @@
+[
+  {
+    "id": 5,
+    "title": "Solo Leveling",
+    "type": "novel",
+    "cover": "https://m.media-amazon.com/images/I/81eG2yPXi+L._AC_UF1000,1000_QL80_.jpg",
+    "rating": 4.9,
+    "genres": "Action, Fantasy, Adventure",
+    "chapters_count": 270,
+    "description": "The story of Sung Jin-Woo, the weakest hunter who becomes the strongest through a mysterious system.",
+    "author": "Chugong",
+    "status": "Completed",
+    "chapters": [
+      {
+        "id": 501,
+        "title": "Prologue"
+      },
+      {
+        "id": 502,
+        "title": "Chapter 1: The Reawakened"
+      },
+      {
+        "id": 503,
+        "title": "Chapter 2: A New Power"
+      }
+    ]
+  }
+]

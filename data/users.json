@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "name": "AdminUser",
+    "email": "admin@rovel.com",
+    "password": "$2b$10$rLyVJ5aBZ1bJ5c6Z5XzZX.DAADAAgLp5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z",
+    "role": "admin",
+    "created_at": "2023-05-15T10:30:00.000Z",
+    "last_login": "2023-09-01T14:22:00.000Z"
+  },
+  {
+    "id": 2,
+    "name": "GuestUser1",
+    "email": null,
+    "password": null,
+    "role": "guest",
+    "created_at": "2023-08-20T16:45:00.000Z",
+    "last_login": "2023-09-01T12:15:00.000Z"
+  },
+  {
+    "id": 3,
+    "name": "GuestUser2",
+    "email": null,
+    "password": null,
+    "role": "guest",
+    "created_at": "2023-08-25T09:12:00.000Z",
+    "last_login": "2023-09-01T10:30:00.000Z"
+  }
+]

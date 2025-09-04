@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "title": "Demon Slayer",
+    "type": "manga",
+    "cover": "https://miscmedia-9gag-fun.9cache.com/images/thumbnail-facebook/1557550358.6787_UUUUUV_n.jpg",
+    "rating": 4.8,
+    "genres": "Action, Fantasy, Supernatural",
+    "chapters_count": 205,
+    "description": "A boy becomes a demon slayer after his family is slaughtered and his sister transformed into a demon.",
+    "author": "Koyoharu Gotouge",
+    "status": "Completed",
+    "chapters": [
+      {
+        "id": 101,
+        "title": "Cruelty"
+      },
+      {
+        "id": 102,
+        "title": "Final Selection"
+      },
+      {
+        "id": 103,
+        "title": "First Mission"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "One Piece",
+    "type": "manga",
+    "cover": "https://staticg.sportskeeda.com/editor/2023/03/ec2e3-16782843421655-1920.jpg",
+    "rating": 4.9,
+    "genres": "Action, Adventure, Comedy",
+    "chapters_count": 1085,
+    "description": "Monkey D. Luffy and his pirate crew explore the Grand Line in search of the world's ultimate treasure.",
+    "author": "Eiichiro Oda",
+    "status": "Ongoing",
+    "chapters": [
+      {
+        "id": 201,
+        "title": "Romance Dawn"
+      },
+      {
+        "id": 202,
+        "title": "They Call Him Straw Hat Luffy"
+      },
+      {
+        "id": 203,
+        "title": "Introducing Pirate Hunter Zoro"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Attack on Titan",
+    "type": "manga",
+    "cover": "https://cdn.oneesports.gg/cdn-data/2023/04/Anime_AttackOnTitan_ArminArlert-1024x576.jpg",
+    "rating": 4.7,
+    "genres": "Action, Dark Fantasy, Horror",
+    "chapters_count": 139,
+    "description": "In a world where humanity lives behind walls to protect themselves from Titans, a young boy vows to eradicate them.",
+    "author": "Hajime Isayama",
+    "status": "Completed",
+    "chapters": [
+      {
+        "id": 301,
+        "title": "To You, 2,000 Years From Now"
+      },
+      {
+        "id": 302,
+        "title": "That Day"
+      },
+      {
+        "id": 303,
+        "title": "Night of the Disbanding Ceremony"
+      }
+    ]
+  }
+]

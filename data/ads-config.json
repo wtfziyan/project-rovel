@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "adUnits": {
+    "BANNER": "ca-app-pub-3940256099942544/9257395921",
+    "INTERSTITIAL": "ca-app-pub-3940256099942544/1033173712",
+    "REWARDED": "ca-app-pub-3940256099942544/5224354917",
+    "REWARDED_INTERSTITIAL": "ca-app-pub-3940256099942544/5354046379"
+  },
+  "adFrequency": {
+    "TAB_SWITCH": 0.3,
+    "CHAPTER_UNLOCK": 1.0
+  }
+}
